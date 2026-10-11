@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  role          Role           @default(STUDENT)
+  student       Student?
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model Student {
+  id         String      @id @default(cuid())
+  userId     String      @unique
+  fullName   String
+  year       String      // e.g. "1st Year", "2nd Year", "3rd Year"
+  branch     String      // e.g. "Civil", "Mechanical", "Computer"
+  mobile     String
+  routeId    String?
+  feesPaid   Float       @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  route      Route?      @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  idRequests IDRequest[]
+  digitalId  DigitalID?
+  payments   Payment[]
+
+  @@map("students")
+}
+
+model Route {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  fee       Float
+  students  Student[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("routes")
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  studentId String
+  amount    Float
+  date      DateTime @default(now())
+  note      String?
+  createdAt DateTime @default(now())
+
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model IDRequest {
+  id          String        @id @default(cuid())
+  studentId   String
+  status      RequestStatus @default(PENDING)
+  adminRemark String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("id_requests")
+}
+
+model DigitalID {
+  id        String   @id @default(cuid())
+  studentId String   @unique
+  idNumber  String   @unique
+  issuedAt  DateTime @default(now())
+
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("digital_ids")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, SUCCESS, WARNING, ERROR
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
