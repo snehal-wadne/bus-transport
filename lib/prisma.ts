@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 
+// Ensure DIRECT_URL defaults to DATABASE_URL if not provided (e.g. on Vercel with Neon/Render)
+if (!process.env.DIRECT_URL && process.env.DATABASE_URL) {
+  process.env.DIRECT_URL = process.env.DATABASE_URL;
+}
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };

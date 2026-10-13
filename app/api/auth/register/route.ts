@@ -92,6 +92,8 @@ export async function POST(req: Request) {
 
     const errorMessage = error?.message || "";
     const lowerMessage = errorMessage.toLowerCase();
+    const dbUrl = process.env.DATABASE_URL || "";
+
     const isDbError =
       Boolean(error?.code?.startsWith?.("P")) ||
       Boolean(error?.errorCode?.startsWith?.("P")) ||
@@ -107,17 +109,31 @@ export async function POST(req: Request) {
       lowerMessage.includes("environment variable");
 
     let clientError = "Internal server error during registration";
-    if (isDbError) {
+
+    if (!dbUrl) {
       clientError =
-        "Database connection error. Please ensure PostgreSQL is running and DATABASE_URL in .env is valid.";
-    } else if (errorMessage && process.env.NODE_ENV !== "production") {
+        "DATABASE_URL is missing in environment variables. On Vercel, please add your cloud PostgreSQL connection string in Project Settings > Environment Variables.";
+    } else if (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.1")) {
+      clientError =
+        "Vercel cannot connect to 'localhost:5432'. On Vercel, DATABASE_URL must point to a cloud-hosted database (e.g. Supabase, Neon, or Render).";
+    } else if (error?.code === "P2021" || lowerMessage.includes("does not exist") || lowerMessage.includes("table")) {
+      clientError =
+        "Database is connected, but schema tables are missing. Please run 'npx prisma db push' with your production DATABASE_URL.";
+    } else if (lowerMessage.includes("password authentication failed") || lowerMessage.includes("authentication failed")) {
+      clientError =
+        "Database authentication failed. Please verify the database user and password in your Vercel Environment Variables.";
+    } else if (isDbError) {
+      clientError = errorMessage
+        ? `Database connection error: ${errorMessage}`
+        : "Database connection failed. Please verify your DATABASE_URL in Vercel.";
+    } else if (errorMessage) {
       clientError = `Registration error: ${errorMessage}`;
     }
 
     return NextResponse.json(
       {
         error: clientError,
-        details: process.env.NODE_ENV !== "production" ? errorMessage : undefined,
+        details: errorMessage || undefined,
       },
       { status: 500 }
     );
