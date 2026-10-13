@@ -16,6 +16,8 @@ import {
   Sparkles,
   MapPin,
   Check,
+  ShieldCheck,
+  Receipt,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
@@ -54,6 +56,9 @@ export default function StudentProfileForm({
   const [branch, setBranch] = useState(initialData?.branch || "Computer");
   const [routeId, setRouteId] = useState(initialData?.routeId || "");
   const [feesPaid, setFeesPaid] = useState<number>(initialData?.feesPaid ?? 0);
+  const [paymentMode, setPaymentMode] = useState<string>("UPI");
+  const [paymentRef, setPaymentRef] = useState<string>("");
+  const [paymentNote, setPaymentNote] = useState<string>("");
 
   // UI State
   const [loading, setLoading] = useState(false);
@@ -138,6 +143,9 @@ export default function StudentProfileForm({
           branch,
           routeId,
           feesPaid: Number(feesPaid),
+          paymentMode: feesPaid > 0 ? paymentMode : "PAY_LATER",
+          paymentRef: paymentRef.trim(),
+          paymentNote: paymentNote.trim(),
         }),
       });
 
@@ -494,16 +502,18 @@ export default function StudentProfileForm({
             </div>
           )}
 
-          {/* STEP 4: Payment Details & Fee Calculation (Asks Payment THEN!) */}
+          {/* STEP 4: Payment Details & Fee Calculation (Asks Payment THEN Admin Review!) */}
           {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-emerald-600" />
-                  <span>Step 4: Fee Ledger & Initial Payment</span>
-                </h3>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                    Step 4: How Much Paid & Administrative Review
+                  </h3>
+                </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Confirm your route fee and record your initial payment amount
+                  Declare your route payment. Applications and payment receipts are verified by administration before issuing your pass.
                 </p>
               </div>
 
@@ -516,7 +526,7 @@ export default function StudentProfileForm({
                     </div>
                     <div>
                       <span className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold block">
-                        Chosen Route
+                        Assigned Bus Route
                       </span>
                       <span className="text-sm font-bold text-slate-900 dark:text-white">
                         {selectedRoute.name}
@@ -533,14 +543,14 @@ export default function StudentProfileForm({
                 </div>
               )}
 
-              {/* Fees Paid Input */}
+              {/* How Much Paid Input */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Payment Amount by Student (₹)
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    How much have you paid? (₹)
                   </label>
                   <span className="text-xs text-slate-400 font-medium">
-                    Annual Route Fee: {formatCurrency(totalFee)}
+                    Total Route Fare: {formatCurrency(totalFee)}
                   </span>
                 </div>
 
@@ -596,7 +606,76 @@ export default function StudentProfileForm({
                 </div>
               </div>
 
-              {/* Live Fee Calculation Summary Card */}
+              {/* Payment Details when feesPaid > 0 */}
+              {feesPaid > 0 ? (
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Select Payment Mode
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { id: "UPI", label: "UPI / QR", desc: "GPay, PhonePe, Paytm" },
+                        { id: "CASH", label: "Cash Desk", desc: "Campus accounts counter" },
+                        { id: "NETBANKING", label: "Bank Transfer", desc: "NEFT / RTGS / IMPS" },
+                        { id: "CHEQUE_DD", label: "DD / Cheque", desc: "Bank Draft" },
+                      ].map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setPaymentMode(m.id)}
+                          className={`p-2 rounded-lg border text-left transition-all ${
+                            paymentMode === m.id
+                              ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 ring-2 ring-indigo-500/20 text-indigo-950 dark:text-indigo-200"
+                              : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                          }`}
+                        >
+                          <span className="text-xs font-bold block">{m.label}</span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5">{m.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Transaction Reference ID / UTR / Receipt No.
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentRef}
+                      onChange={(e) => setPaymentRef(e.target.value)}
+                      placeholder="e.g. UTR 428190829102 or Receipt #502"
+                      className="w-full px-3.5 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Entering the transaction reference helps the admin quickly verify and approve your pass.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Payment Note / Remarks (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentNote}
+                      onChange={(e) => setPaymentNote(e.target.value)}
+                      placeholder="e.g. Paid at campus counter on 12th Oct"
+                      className="w-full px-3.5 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>
+                    You selected <strong>₹0 (Pay Later)</strong>. Your bus route registration will be submitted for administrative review, and you can clear your route fee in person at the campus counter.
+                  </span>
+                </div>
+              )}
+
+              {/* Real-Time Fee Calculation Summary Card */}
               <div className="rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 p-5 space-y-3">
                 <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-bold text-xs uppercase tracking-wider">
                   <Sparkles className="w-4 h-4" />
@@ -635,6 +714,19 @@ export default function StudentProfileForm({
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 italic text-center pt-1">
                   Formula: Pending ({formatCurrency(pendingFees)}) = Total ({formatCurrency(totalFee)}) - Paid ({formatCurrency(feesPaid)})
                 </p>
+              </div>
+
+              {/* Administrative Review Protocol Notice Banner */}
+              <div className="p-4 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-bold text-amber-900 dark:text-amber-200 block">
+                    Under Administrative Review Protocol
+                  </span>
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed">
+                    Once submitted, your declared payment ({formatCurrency(feesPaid)}) and selected bus route will be sent directly to the Transport Administration desk. Transport officers review and reconcile your payment before activating your official Digital Bus ID Pass.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -676,7 +768,7 @@ export default function StudentProfileForm({
                   </>
                 ) : (
                   <>
-                    <span>Submit Transport Profile</span>
+                    <span>Submit Application for Admin Review</span>
                     <CheckCircle2 className="w-4 h-4" />
                   </>
                 )}

@@ -108,6 +108,18 @@ export default function StudentProfileCard({
         </div>
       )}
 
+      {status === "PENDING" && (
+        <div className="p-4 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-3">
+          <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+          <div>
+            <span className="font-bold block text-sm">Application Under Administrative Review</span>
+            <span className="text-amber-800 dark:text-amber-300 mt-0.5 block leading-relaxed">
+              Your bus pass application for <strong>{profile.route?.name || "selected route"}</strong> with a declared payment of <strong>{formatCurrency(profile.feesPaid)}</strong> has been submitted. The transport department will review and reconcile your payment before activating your official bus pass.
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Grid: Details and Live Fees Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Personal & Academic Details Card */}

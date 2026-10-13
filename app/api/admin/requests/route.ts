@@ -71,6 +71,7 @@ export async function GET(req: Request) {
               route: true,
               user: { select: { email: true } },
               digitalId: true,
+              payments: { orderBy: { createdAt: "desc" } },
             },
           },
         },
@@ -112,6 +113,7 @@ export async function GET(req: Request) {
           totalFee,
           pendingFees,
           digitalId: student.digitalId,
+          payments: student.payments,
         },
       };
     });

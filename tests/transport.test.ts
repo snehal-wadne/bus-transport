@@ -275,4 +275,33 @@ describe("Digital ID Generation & Verification Suite", () => {
     expect(payload.studentName).toBeTruthy();
     expect(payload.route).toBe("Warje Bridge");
   });
+
+  it("should validate student payment declaration with mode and transaction reference", () => {
+    const paymentDeclarationSchema = z.object({
+      feesPaid: z.number().min(0),
+      paymentMode: z.enum(["UPI", "CASH", "NETBANKING", "CHEQUE_DD", "PAY_LATER"]),
+      paymentRef: z.string().optional(),
+      paymentNote: z.string().optional(),
+    });
+
+    const validUpiDeclaration = {
+      feesPaid: 18000,
+      paymentMode: "UPI" as const,
+      paymentRef: "UTR4928190284",
+      paymentNote: "Paid via Google Pay",
+    };
+
+    const parsed = paymentDeclarationSchema.safeParse(validUpiDeclaration);
+    expect(parsed.success).toBe(true);
+
+    const payLaterDeclaration = {
+      feesPaid: 0,
+      paymentMode: "PAY_LATER" as const,
+      paymentRef: "",
+      paymentNote: "Will pay at transit counter",
+    };
+
+    const parsedPayLater = paymentDeclarationSchema.safeParse(payLaterDeclaration);
+    expect(parsedPayLater.success).toBe(true);
+  });
 });

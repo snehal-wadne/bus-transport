@@ -27,6 +27,9 @@ const studentProfileSchema = z.object({
   feesPaid: z.coerce
     .number()
     .min(0, "Fees paid cannot be negative"),
+  paymentMode: z.string().optional().nullable(),
+  paymentRef: z.string().optional().nullable(),
+  paymentNote: z.string().optional().nullable(),
 });
 
 // GET /api/student/profile
@@ -46,6 +49,9 @@ export async function GET() {
           take: 1,
         },
         digitalId: true,
+        payments: {
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
 
@@ -100,7 +106,17 @@ async function handleProfileSave(req: Request) {
       );
     }
 
-    const { fullName, year, branch, mobile, routeId, feesPaid } = parseResult.data;
+    const {
+      fullName,
+      year,
+      branch,
+      mobile,
+      routeId,
+      feesPaid,
+      paymentMode,
+      paymentRef,
+      paymentNote,
+    } = parseResult.data;
 
     // Verify route exists
     const route = await prisma.route.findUnique({
@@ -190,6 +206,41 @@ async function handleProfileSave(req: Request) {
       });
     }
 
+    // Record payment ledger entry if student declared payment
+    if (feesPaid > 0) {
+      const modeStr = paymentMode ? `Mode: ${paymentMode}` : "Online / Cash";
+      const refStr = paymentRef ? ` | Ref/UTR: ${paymentRef}` : "";
+      const extraNote = paymentNote ? ` | ${paymentNote}` : "";
+      const paymentRecordNote = `Registration Payment - ${modeStr}${refStr}${extraNote}`;
+
+      const existingPayments = await prisma.payment.findMany({
+        where: { studentId: savedStudent.id },
+      });
+
+      if (existingPayments.length === 0) {
+        await prisma.payment.create({
+          data: {
+            studentId: savedStudent.id,
+            amount: feesPaid,
+            note: paymentRecordNote,
+            date: new Date(),
+          },
+        });
+      } else if (existingStudent && feesPaid !== existingStudent.feesPaid) {
+        const diff = feesPaid - existingStudent.feesPaid;
+        if (diff > 0) {
+          await prisma.payment.create({
+            data: {
+              studentId: savedStudent.id,
+              amount: diff,
+              note: `Updated Payment - ${paymentRecordNote}`,
+              date: new Date(),
+            },
+          });
+        }
+      }
+    }
+
     // Automatically create a PENDING IDRequest if no request exists yet
     let activeRequest = savedStudent.idRequests[0] || null;
     if (!activeRequest) {
@@ -203,8 +254,8 @@ async function handleProfileSave(req: Request) {
 
       await createNotification({
         userId: session.user.id,
-        title: "Pass Application Submitted",
-        message: `Your bus pass application for ${route.name} has been submitted and is currently under administrative review.`,
+        title: "Application Submitted for Admin Review",
+        message: `Your bus pass application for ${route.name} with declared payment of ₹${feesPaid.toLocaleString("en-IN")} has been submitted and is currently under administrative review.`,
         type: "INFO",
         link: "/student/dashboard",
       });
@@ -213,8 +264,8 @@ async function handleProfileSave(req: Request) {
     return NextResponse.json(
       {
         message: existingStudent
-          ? "Student profile updated successfully"
-          : "Student profile registered successfully",
+          ? "Student profile updated and submitted for admin review"
+          : "Student profile registered and submitted for admin review",
         profile: {
           ...savedStudent,
           totalFee,

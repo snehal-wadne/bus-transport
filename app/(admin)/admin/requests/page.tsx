@@ -51,6 +51,13 @@ interface RequestItem {
       idNumber: string;
       issuedAt: string;
     } | null;
+    payments?: Array<{
+      id: string;
+      amount: number;
+      date: string;
+      note?: string | null;
+      createdAt: string;
+    }>;
   };
 }
 
@@ -373,18 +380,30 @@ export default function AdminRequestsPage() {
 
                       {/* Fee Balance */}
                       <td className="px-5 py-4 text-right">
-                        <span className="block font-semibold text-emerald-600 dark:text-emerald-400">
-                          Paid: {formatCurrency(req.student.feesPaid)}
-                        </span>
-                        <span
-                          className={`block text-[11px] font-bold ${
-                            req.student.pendingFees > 0
-                              ? "text-rose-600 dark:text-rose-400"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          Pending: {formatCurrency(req.student.pendingFees)}
-                        </span>
+                        <div className="flex flex-col items-end gap-1">
+                          {req.student.feesPaid >= req.student.totalFee && req.student.totalFee > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              Paid Full: {formatCurrency(req.student.feesPaid)}
+                            </span>
+                          ) : req.student.feesPaid > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                              Paid: {formatCurrency(req.student.feesPaid)}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              Pay Later (₹0)
+                            </span>
+                          )}
+                          <span
+                            className={`block text-[11px] font-semibold ${
+                              req.student.pendingFees > 0
+                                ? "text-rose-600 dark:text-rose-400"
+                                : "text-emerald-600 dark:text-emerald-400"
+                            }`}
+                          >
+                            Bal: {formatCurrency(req.student.pendingFees)}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Status Badge */}
@@ -676,45 +695,89 @@ export default function AdminRequestsPage() {
                 </div>
               </div>
 
-              {/* Route & Fee Breakdown */}
+              {/* Route & Fee Breakdown + Payment Audit */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Route Fee Breakdown
-                </h4>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Assigned Bus Route:</span>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Route Fare & Declared Payment Audit
+                  </h4>
+                  {selectedRequest.student.feesPaid >= selectedRequest.student.totalFee && selectedRequest.student.totalFee > 0 ? (
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      100% Cleared
+                    </span>
+                  ) : selectedRequest.student.feesPaid > 0 ? (
+                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+                      Partial Declared
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                      Pay Later
+                    </span>
+                  )}
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Selected Bus Route:</span>
                     <span className="font-bold text-slate-900 dark:text-white">
                       {selectedRequest.student.route?.name}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Total Route Fare:</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Official Annual Fare:</span>
                     <span className="font-semibold text-slate-900 dark:text-white">
                       {formatCurrency(selectedRequest.student.totalFee)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-emerald-600 font-semibold">Fees Paid by Student:</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-emerald-600 font-semibold">Payment Declared by Student:</span>
                     <span className="font-bold text-emerald-600">
                       {formatCurrency(selectedRequest.student.feesPaid)}
                     </span>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-800 text-sm">
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800 text-sm">
                     <span className="font-semibold text-slate-900 dark:text-white">
-                      Pending Balance:
+                      Pending Fee Balance:
                     </span>
                     <span
                       className={`font-extrabold ${
                         selectedRequest.student.pendingFees > 0
                           ? "text-rose-600 dark:text-rose-400"
-                          : "text-emerald-600"
+                          : "text-emerald-600 dark:text-emerald-400"
                       }`}
                     >
                       {formatCurrency(selectedRequest.student.pendingFees)}
                     </span>
                   </div>
                 </div>
+
+                {/* Declared Payment Logs & References */}
+                {selectedRequest.student.payments && selectedRequest.student.payments.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/60 space-y-2">
+                    <span className="text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-300 block">
+                      Payment Verification Reference:
+                    </span>
+                    {selectedRequest.student.payments.map((p) => (
+                      <div key={p.id} className="text-xs space-y-0.5">
+                        <div className="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-200">
+                          <span>Amount: {formatCurrency(p.amount)}</span>
+                          <span className="text-[10px] text-slate-500">
+                            {new Date(p.date || p.createdAt).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        {p.note && (
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 font-mono bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                            {p.note}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Show Rejection Remark if rejected */}
