@@ -183,3 +183,42 @@ export async function PATCH(
     );
   }
 }
+
+// DELETE /api/admin/students/[id] - Remove student and associated user account
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const isAdmin = await checkAdmin();
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
+    }
+
+    const { id } = params;
+    const student = await prisma.student.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!student) {
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    }
+
+    // Delete user account (cascades to student, payments, idRequests, digitalId, notifications)
+    await prisma.user.delete({
+      where: { id: student.userId },
+    });
+
+    return NextResponse.json(
+      { message: `Student account for ${student.fullName} deleted successfully` },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("DELETE /api/admin/students/[id] error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete student account" },
+      { status: 500 }
+    );
+  }
+}

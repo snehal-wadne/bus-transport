@@ -20,6 +20,7 @@ import {
   CreditCard,
   FileSpreadsheet,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
@@ -81,6 +82,31 @@ export default function AdminStudentsPage() {
     setPaymentFeedback(null);
     setIssueNotice(null);
     setEditTotalMode(false);
+  };
+
+  const [deletingStudent, setDeletingStudent] = useState(false);
+
+  const handleDeleteStudent = async (studentId: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this student account? This will remove all their pass requests, digital pass, payments, and account data.")) {
+      return;
+    }
+    setDeletingStudent(true);
+    try {
+      const res = await fetch(`/api/admin/students/${studentId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setSelectedStudent(null);
+        fetchStudents();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete student account");
+      }
+    } catch (err) {
+      alert("Network error while deleting student account");
+    } finally {
+      setDeletingStudent(false);
+    }
   };
 
   const handleRecordPaymentInDrawer = async (e: React.FormEvent) => {
@@ -973,7 +999,26 @@ export default function AdminStudentsPage() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-[#1F2937] flex justify-end">
+            <div className="pt-6 border-t border-[#1F2937] flex items-center justify-between">
+              <button
+                type="button"
+                disabled={deletingStudent}
+                onClick={() => handleDeleteStudent(selectedStudent.id)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 border border-rose-900/60 transition-all disabled:opacity-50"
+              >
+                {deletingStudent ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Account</span>
+                  </>
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
