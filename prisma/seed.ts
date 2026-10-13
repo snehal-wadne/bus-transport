@@ -26,8 +26,17 @@ async function main() {
 
   console.log(`✅ Admin user ready: ${admin.email} (Role: ${admin.role})`);
 
-  // 2. Seed Default Route (Single unified route)
+  // 2. Seed Default Routes with Different Fares
   const initialRoutes = [
+    { name: "Warje Bridge Route", fee: 18000 },
+    { name: "Dhayari / Ambegaon Route", fee: 19000 },
+    { name: "Bhumkar Bridge Route", fee: 20000 },
+    { name: "Navale Bridge Route", fee: 21000 },
+    { name: "Vadgaon Bridge Route", fee: 22000 },
+    { name: "Narhe Campus Route", fee: 22500 },
+    { name: "Katraj Hub Route", fee: 24000 },
+    { name: "Kothrud / Deccan Route", fee: 25000 },
+    { name: "Swargate City Express Route", fee: 26000 },
     { name: "Warje - Vadgaon - Navale - Narhe - Bhumkar Route", fee: 22000 },
   ];
 
