@@ -92,7 +92,13 @@ export async function POST(req: Request) {
 
     const errorMessage = error?.message || "";
     const lowerMessage = errorMessage.toLowerCase();
-    const dbUrl = process.env.DATABASE_URL || "";
+    const dbUrl =
+      process.env.DATABASE_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL ||
+      process.env.NEON_DATABASE_URL ||
+      process.env.DATABASE_URL_UNPOOLED ||
+      "";
 
     const isDbError =
       Boolean(error?.code?.startsWith?.("P")) ||
@@ -112,7 +118,7 @@ export async function POST(req: Request) {
 
     if (!dbUrl) {
       clientError =
-        "DATABASE_URL is missing in environment variables. On Vercel, please add your cloud PostgreSQL connection string in Project Settings > Environment Variables.";
+        "DATABASE_URL is missing in environment variables. If you just added it in Vercel Settings, please go to the Deployments tab and click Redeploy so the new variable takes effect.";
     } else if (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.1")) {
       clientError =
         "Vercel cannot connect to 'localhost:5432'. On Vercel, DATABASE_URL must point to a cloud-hosted database (e.g. Supabase, Neon, or Render).";

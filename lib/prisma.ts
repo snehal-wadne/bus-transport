@@ -1,6 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 
-// Ensure DIRECT_URL defaults to DATABASE_URL if not provided (e.g. on Vercel with Neon/Render)
+// Resolve database URL from any standard environment variable key
+const resolvedDbUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.NEON_DATABASE_URL ||
+  process.env.DATABASE_URL_UNPOOLED;
+
+if (resolvedDbUrl && !process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = resolvedDbUrl;
+}
+
 if (!process.env.DIRECT_URL && process.env.DATABASE_URL) {
   process.env.DIRECT_URL = process.env.DATABASE_URL;
 }
