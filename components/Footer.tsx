@@ -85,7 +85,7 @@ export default function Footer() {
               </li>
               <li>
                 <span className="text-[#9CA3AF]/60">
-                  Campus Fleet: Warje • Vadgaon • Bhumkar
+                  Corridor Stops: Warje • Vadgaon • Narhe
                 </span>
               </li>
             </ul>

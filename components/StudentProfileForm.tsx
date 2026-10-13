@@ -18,6 +18,7 @@ import {
   Check,
   ShieldCheck,
   Receipt,
+  Navigation,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
@@ -388,31 +389,56 @@ export default function StudentProfileForm({
             </div>
           )}
 
-          {/* STEP 3: Route Selection (Asks Route First!) */}
+          {/* STEP 3: Pickup Stop Selection on the Single Route Corridor */}
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
                   <Bus className="w-4 h-4 text-indigo-600" />
-                  <span>Step 3: Select Your Bus Route</span>
+                  <span>Step 3: Select Your Boarding Pickup Stop</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Pick your boarding stop. Each route has its specific annual transportation fare.
+                  Single College Bus Corridor: Choose your pickup stop. The annual transport fee is determined by your chosen stop.
                 </p>
               </div>
 
-              {/* Route Grid Selection */}
+              {/* Corridor Route Visual Line */}
+              <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60">
+                <div className="flex items-center gap-2 mb-2 text-indigo-700 dark:text-indigo-300 font-bold text-xs">
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>College Transit Route Corridor</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    Warje Bridge Flyover (₹22k)
+                  </span>
+                  <span className="text-indigo-400">➔</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    Vadgaon Bridge (₹22k)
+                  </span>
+                  <span className="text-indigo-400">➔</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    Narhe (₹20k)
+                  </span>
+                  <span className="text-indigo-400">➔</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white shadow-sm">
+                    Flora Campus 🎓
+                  </span>
+                </div>
+              </div>
+
+              {/* Stops Selection */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">
-                  Available Campus Bus Routes & Fares
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">
+                  Select Your Pickup Point & Fare
                 </label>
 
                 {routes.length === 0 ? (
                   <div className="p-8 text-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-500">
-                    <p className="text-sm">No bus routes configured yet.</p>
+                    <p className="text-sm">Loading pickup stops...</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {routes.map((r) => {
                       const isSelected = routeId === r.id;
                       return (
@@ -424,14 +450,14 @@ export default function StudentProfileForm({
                           }}
                           className={`cursor-pointer p-4 rounded-xl border transition-all flex flex-col justify-between ${
                             isSelected
-                              ? "border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-sm"
+                              ? "border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 ring-2 ring-indigo-500/20 shadow-md shadow-indigo-600/10"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-900/40"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2">
+                          <div>
+                            <div className="flex items-start justify-between gap-2">
                               <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                                   isSelected
                                     ? "bg-indigo-600 text-white"
                                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
@@ -439,23 +465,27 @@ export default function StudentProfileForm({
                               >
                                 <MapPin className="w-4 h-4" />
                               </div>
-                              <span className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
-                                {r.name}
-                              </span>
+                              {isSelected && (
+                                <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                  <Check className="w-3 h-3" />
+                                </div>
+                              )}
                             </div>
-                            {isSelected && (
-                              <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                                <Check className="w-3 h-3" />
-                              </div>
-                            )}
+
+                            <span className="font-bold text-sm text-slate-900 dark:text-white block mt-3 leading-snug">
+                              {r.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
+                              Campus Boarding Stop
+                            </span>
                           </div>
 
-                          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                              Annual Fee
+                          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                              Stop Fare
                             </span>
                             <span
-                              className={`text-sm font-extrabold ${
+                              className={`text-base font-extrabold ${
                                 isSelected
                                   ? "text-indigo-600 dark:text-indigo-400"
                                   : "text-slate-900 dark:text-white"
@@ -475,14 +505,14 @@ export default function StudentProfileForm({
                 )}
               </div>
 
-              {/* Selected Route Confirmation Box */}
+              {/* Selected Stop Confirmation Box */}
               {selectedRoute && (
-                <div className="p-4 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-between">
+                <div className="p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                     <div>
-                      <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
-                        Selected Destination
+                      <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">
+                        Selected Pickup Stop
                       </span>
                       <span className="text-sm font-bold text-slate-900 dark:text-white">
                         {selectedRoute.name}
@@ -491,9 +521,9 @@ export default function StudentProfileForm({
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] text-slate-400 block uppercase font-semibold">
-                      Total Fee
+                      Required Annual Fee
                     </span>
-                    <span className="text-base font-extrabold text-indigo-600 dark:text-indigo-400">
+                    <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(selectedRoute.fee)}
                     </span>
                   </div>

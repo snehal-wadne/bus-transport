@@ -118,21 +118,21 @@ describe("Student Profile & Fee Calculation Suite", () => {
 
   it("should accurately calculate pending fees and zero balance", () => {
     const routes = [
-      { name: "Warje Bridge", fee: 22000 },
+      { name: "Warje Bridge Flyover", fee: 22000 },
       { name: "Vadgaon Bridge", fee: 22000 },
-      { name: "Bhumkar Bridge", fee: 20000 },
+      { name: "Narhe", fee: 20000 },
     ];
 
-    // Case 1: Partial payment on Warje Bridge
+    // Case 1: Partial payment on Warje Bridge Flyover
     const warjeFee = routes[0].fee;
     const paidPartial = 12000;
     const pending1 = warjeFee - paidPartial;
     expect(pending1).toBe(10000);
 
-    // Case 2: Full payment on Bhumkar Bridge
-    const bhumkarFee = routes[2].fee;
+    // Case 2: Full payment on Narhe
+    const narheFee = routes[2].fee;
     const paidFull = 20000;
-    const pending2 = bhumkarFee - paidFull;
+    const pending2 = narheFee - paidFull;
     expect(pending2).toBe(0);
 
     // Case 3: Zero payment

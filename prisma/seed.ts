@@ -26,30 +26,49 @@ async function main() {
 
   console.log(`✅ Admin user ready: ${admin.email} (Role: ${admin.role})`);
 
-  // 2. Seed Default Routes with Different Fares
-  const initialRoutes = [
-    { name: "Warje Bridge Route", fee: 18000 },
-    { name: "Dhayari / Ambegaon Route", fee: 19000 },
-    { name: "Bhumkar Bridge Route", fee: 20000 },
-    { name: "Navale Bridge Route", fee: 21000 },
-    { name: "Vadgaon Bridge Route", fee: 22000 },
-    { name: "Narhe Campus Route", fee: 22500 },
-    { name: "Katraj Hub Route", fee: 24000 },
-    { name: "Kothrud / Deccan Route", fee: 25000 },
-    { name: "Swargate City Express Route", fee: 26000 },
-    { name: "Warje - Vadgaon - Navale - Narhe - Bhumkar Route", fee: 22000 },
+  // 2. Seed the 3 Boarding Stops on the Campus Transit Corridor
+  const targetStops = [
+    { name: "Warje Bridge Flyover", fee: 22000 },
+    { name: "Vadgaon Bridge", fee: 22000 },
+    { name: "Narhe", fee: 20000 },
   ];
 
-  for (const route of initialRoutes) {
+  const stopMap: Record<string, string> = {};
+
+  for (const stop of targetStops) {
     const upsertedRoute = await prisma.route.upsert({
-      where: { name: route.name },
-      update: { fee: route.fee },
-      create: { name: route.name, fee: route.fee },
+      where: { name: stop.name },
+      update: { fee: stop.fee },
+      create: { name: stop.name, fee: stop.fee },
     });
-    console.log(`✅ Route ready: ${upsertedRoute.name} - ₹${upsertedRoute.fee}`);
+    stopMap[stop.name] = upsertedRoute.id;
+    console.log(`✅ Stop ready: ${upsertedRoute.name} - ₹${upsertedRoute.fee}`);
   }
 
-  console.log("🎉 Seeding completed successfully!");
+  // Re-assign any students attached to old/legacy route names to Warje Bridge Flyover
+  const defaultStopId = stopMap["Warje Bridge Flyover"];
+  const targetNames = targetStops.map((s) => s.name);
+
+  const obsoleteRoutes = await prisma.route.findMany({
+    where: {
+      name: { notIn: targetNames },
+    },
+    include: { students: true },
+  });
+
+  for (const oldRoute of obsoleteRoutes) {
+    if (oldRoute.students.length > 0) {
+      console.log(`🔄 Re-assigning ${oldRoute.students.length} student(s) from "${oldRoute.name}" to default stop...`);
+      await prisma.student.updateMany({
+        where: { routeId: oldRoute.id },
+        data: { routeId: defaultStopId },
+      });
+    }
+    await prisma.route.delete({ where: { id: oldRoute.id } });
+    console.log(`🗑️ Removed obsolete route: ${oldRoute.name}`);
+  }
+
+  console.log("🎉 Seeding completed successfully with exactly 3 corridor stops!");
 }
 
 main()

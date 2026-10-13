@@ -68,10 +68,10 @@ A modern, production-ready, full-stack **College Transport Management System** b
 - **Email**: `admin@college.com`
 - **Password**: `Admin@123`
 
-### 🚌 Default Pre-Seeded Bus Routes
-1. **Warje Bridge**: ₹22,000 / year
+### 🚌 Single Campus Transit Corridor • 3 Boarding Stops
+1. **Warje Bridge Flyover**: ₹22,000 / year
 2. **Vadgaon Bridge**: ₹22,000 / year
-3. **Bhumkar Bridge**: ₹20,000 / year
+3. **Narhe**: ₹20,000 / year
 
 ---
 

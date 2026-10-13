@@ -27,33 +27,21 @@ export default function HomePage() {
   const boardingStops = [
     {
       stopNumber: 1,
-      name: "Warje Chowk / Flyover",
-      landmark: "Near Warje Flyover Junction & Mai Mangeshkar Hospital Bypass",
-      badge: "Starting Point",
+      name: "Warje Bridge Flyover",
+      landmark: "Warje Flyover Junction & Mai Mangeshkar Hospital Bypass",
+      badge: "₹22,000 / year",
     },
     {
       stopNumber: 2,
-      name: "Vadgaon Bridge Hub",
+      name: "Vadgaon Bridge",
       landmark: "Vadgaon Phata Bridge underpass / Sinhagad Road junction",
-      badge: "Transfer Hub",
+      badge: "₹22,000 / year",
     },
     {
       stopNumber: 3,
-      name: "Navale Bridge",
-      landmark: "Navale Bridge Highway Service Road pickup shelter",
-      badge: "Highway Point",
-    },
-    {
-      stopNumber: 4,
-      name: "Narhe Phata / Chowk",
+      name: "Narhe",
       landmark: "Narhe Main Road entrance & campus link connector",
-      badge: "Student Hub",
-    },
-    {
-      stopNumber: 5,
-      name: "Bhumkar Bridge",
-      landmark: "Bhumkar Chowk / Bridge Highway Terminal",
-      badge: "Terminal Stop",
+      badge: "₹20,000 / year",
     },
   ];
 
@@ -84,7 +72,7 @@ export default function HomePage() {
 
           {/* Subheading */}
           <p className="mt-6 text-sm sm:text-lg md:text-xl text-[#9CA3AF] max-w-3xl mx-auto leading-relaxed">
-            Direct dedicated campus bus transit connecting Warje, Vadgaon Bridge, Navale Bridge, Narhe, and Bhumkar Bridge to Flora Institutes. Fast digital pass applications and verified QR boarding passes.
+            Direct dedicated campus bus transit corridor connecting Warje Bridge Flyover, Vadgaon Bridge, and Narhe to Flora Institutes. Fast digital pass applications and verified QR boarding passes.
           </p>
 
           {/* Action Buttons */}
@@ -122,7 +110,7 @@ export default function HomePage() {
                     </span>
                   </h3>
                   <p className="text-xs text-[#9CA3AF]">
-                    Unified Transit Corridor: Warje ➔ Vadgaon Bridge ➔ Navale Bridge ➔ Narhe ➔ Bhumkar Bridge ➔ Flora Campus
+                    Single Transit Corridor: Warje Bridge Flyover ➔ Vadgaon Bridge ➔ Narhe ➔ Flora Campus
                   </p>
                 </div>
               </div>
