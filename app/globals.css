@@ -4,21 +4,140 @@
 
 @layer base {
   :root {
-    --background: #0A0F1C;
-    --foreground: #F9FAFB;
+    --background: #F8FAFC;
+    --foreground: #0F172A;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --muted: #64748B;
   }
 
   .dark {
     --background: #0A0F1C;
     --foreground: #F9FAFB;
+    --card: #111827;
+    --border: #1F2937;
+    --muted: #9CA3AF;
   }
 
   body {
-    background-color: #0A0F1C;
-    color: #F9FAFB;
+    background-color: var(--background);
+    color: var(--foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow-x: hidden;
   }
+}
+
+/* ==========================================================================
+   Light Mode Dynamic Overrides
+   Activated when html does not contain the 'dark' class
+   ========================================================================== */
+html:not(.dark) body {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+html:not(.dark) .bg-\[\#0A0F1C\] {
+  background-color: #F8FAFC !important;
+}
+
+html:not(.dark) .bg-\[\#0A0F1C\]\/90 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
+html:not(.dark) .bg-\[\#111827\] {
+  background-color: #FFFFFF !important;
+}
+
+html:not(.dark) .bg-\[\#111827\]\/80 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+html:not(.dark) .border-\[\#1F2937\] {
+  border-color: #E2E8F0 !important;
+}
+
+html:not(.dark) .text-\[\#F9FAFB\] {
+  color: #0F172A !important;
+}
+
+html:not(.dark) .text-\[\#9CA3AF\] {
+  color: #64748B !important;
+}
+
+html:not(.dark) .text-\[\#9CA3AF\]\/60 {
+  color: #94A3B8 !important;
+}
+
+html:not(.dark) .transit-grid-bg {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.12) 1px, transparent 1px) !important;
+  background-color: #F8FAFC !important;
+}
+
+html:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid #E2E8F0 !important;
+}
+
+/* Input, select, textarea styling in Light Mode */
+html:not(.dark) input.bg-\[\#0A0F1C\],
+html:not(.dark) select.bg-\[\#0A0F1C\],
+html:not(.dark) textarea.bg-\[\#0A0F1C\] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) select::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Structural elements in Light Mode */
+html:not(.dark) header {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+html:not(.dark) footer {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #64748B !important;
+}
+
+html:not(.dark) aside {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+/* Alerts and banners in Light Mode */
+html:not(.dark) .bg-rose-950\/40 {
+  background-color: #FFF1F2 !important;
+  border-color: #FECDD3 !important;
+  color: #BE123C !important;
+}
+
+html:not(.dark) .bg-emerald-950\/40 {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+  color: #047857 !important;
+}
+
+/* Hover background tweaks for Light Mode */
+html:not(.dark) .hover\:bg-\[\#111827\]:hover {
+  background-color: #F1F5F9 !important;
+}
+
+html:not(.dark) .hover\:bg-\[\#0A0F1C\]:hover {
+  background-color: #F1F5F9 !important;
+}
+
+html:not(.dark) .hover\:text-\[\#F9FAFB\]:hover {
+  color: #0F172A !important;
 }
 
 /* 3D Flip Utilities */
@@ -31,7 +150,7 @@
   -webkit-backface-visibility: hidden;
 }
 
-/* Transit Grid Background Pattern */
+/* Transit Grid Background Pattern (Dark Default) */
 .transit-grid-bg {
   background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px);
   background-size: 24px 24px;

@@ -89,17 +89,35 @@ export async function POST(req: Request) {
     );
   } catch (error: any) {
     console.error("Registration error:", error);
+
+    const errorMessage = error?.message || "";
+    const lowerMessage = errorMessage.toLowerCase();
     const isDbError =
-      error?.code?.startsWith?.("P") ||
-      error?.message?.includes?.("tenant/user") ||
-      error?.message?.includes?.("Can't reach database server") ||
-      error?.message?.includes?.("database");
+      Boolean(error?.code?.startsWith?.("P")) ||
+      Boolean(error?.errorCode?.startsWith?.("P")) ||
+      Boolean(error?.name?.toLowerCase()?.includes("prisma")) ||
+      lowerMessage.includes("database") ||
+      lowerMessage.includes("can't reach database server") ||
+      lowerMessage.includes("tenant/user") ||
+      lowerMessage.includes("econnrefused") ||
+      lowerMessage.includes("connection") ||
+      lowerMessage.includes("postgresql") ||
+      lowerMessage.includes("postgres") ||
+      lowerMessage.includes("password authentication failed") ||
+      lowerMessage.includes("environment variable");
+
+    let clientError = "Internal server error during registration";
+    if (isDbError) {
+      clientError =
+        "Database connection error. Please ensure PostgreSQL is running and DATABASE_URL in .env is valid.";
+    } else if (errorMessage && process.env.NODE_ENV !== "production") {
+      clientError = `Registration error: ${errorMessage}`;
+    }
 
     return NextResponse.json(
       {
-        error: isDbError
-          ? "Database connection failed. Please configure your DATABASE_URL in .env and run 'npx prisma db push'."
-          : "Internal server error during registration",
+        error: clientError,
+        details: process.env.NODE_ENV !== "production" ? errorMessage : undefined,
       },
       { status: 500 }
     );
